@@ -49,7 +49,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
               <span>GitHub</span>
             </a>
-            <a href="https://linkedin.com/in/juan-david-herrera-redondo" target="_blank" class="social-icon-btn" title="LinkedIn">
+            <a href="https://www.linkedin.com/in/juan-david-herrera-redondo-624757332" target="_blank" rel="noopener noreferrer" class="social-icon-btn" title="LinkedIn">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
               <span>LinkedIn</span>
             </a>
@@ -361,44 +361,77 @@ function setupContactForm() {
     });
   });
 
-  contactForm.addEventListener('submit', (e) => {
+  // FormSubmit AJAX: entrega los mensajes a la bandeja de Juan sin backend propio.
+  // La PRIMERA vez FormSubmit envía un correo de confirmación que hay que aprobar una sola vez.
+  const FORMSUBMIT_ENDPOINT = 'https://formsubmit.co/ajax/jd5073356@gmail.com';
+
+  contactForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     const card = document.querySelector('.contact-card') as HTMLDivElement;
-    if (card) {
-      const originalContent = card.innerHTML;
-      
-      // Trigger intense gravitational collapse
-      sceneManager.triggerContactAbsorb(true);
-      // Play wormhole warp sound effect
-      audioSystem.playWormhole();
-      
-      card.style.transform = 'scale(0.95)';
-      card.style.opacity = '0.5';
-      card.style.transition = 'all 1s cubic-bezier(0.16, 1, 0.3, 1)';
-      
-      setTimeout(() => {
-        sceneManager.triggerContactAbsorb(false);
-        card.style.transform = 'scale(1)';
-        card.style.opacity = '1';
-        card.innerHTML = `
-          <div style="text-align: center; padding: 2rem 0; animation: fadeIn 0.8s ease forwards;">
-            <div style="font-size: 4rem; margin-bottom: 1.5rem; animation: pulse 2s infinite;">✉️🚀</div>
-            <h2 class="section-title" style="background: linear-gradient(135deg, #00ffcc 0%, #3399ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">¡Mensaje Transmitido!</h2>
-            <p class="subtitle" style="margin-top: 1rem; font-size: 0.95rem;">Tu transmisión ha cruzado el horizonte de sucesos con éxito. Responderé tan pronto como mi transceptor reciba tu señal.</p>
-            <button id="reset-form-btn" class="cta-button" style="margin-top: 1rem; padding: 0.7rem 1.5rem; font-size: 0.9rem;">Enviar otra señal</button>
-          </div>
-        `;
-        
-        const resetBtn = document.getElementById('reset-form-btn');
-        if (resetBtn) {
-          resetBtn.addEventListener('click', () => {
-            card.innerHTML = originalContent;
-            // Re-attach event listeners
-            setupContactForm();
-          });
-        }
-      }, 1200);
+    if (!card) return;
+    const submitBtn = contactForm.querySelector('.submit-btn') as HTMLButtonElement | null;
+    const originalContent = card.innerHTML;
+
+    const payload = {
+      name: (document.getElementById('name') as HTMLInputElement)?.value ?? '',
+      email: (document.getElementById('email') as HTMLInputElement)?.value ?? '',
+      message: (document.getElementById('message') as HTMLTextAreaElement)?.value ?? '',
+      _subject: 'Nuevo mensaje desde el portafolio 3D',
+      _template: 'table',
+      _captcha: 'false',
+    };
+
+    // Sending state + gravitational collapse animation
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Enviando…'; }
+    sceneManager.triggerContactAbsorb(true);
+    audioSystem.playWormhole();
+    card.style.transition = 'all 1s cubic-bezier(0.16, 1, 0.3, 1)';
+    card.style.transform = 'scale(0.97)';
+    card.style.opacity = '0.7';
+
+    try {
+      const res = await fetch(FORMSUBMIT_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await res.json();
+
+      // Success — only shown once the message actually went through
+      sceneManager.triggerContactAbsorb(false);
+      card.style.transform = 'scale(1)';
+      card.style.opacity = '1';
+      card.innerHTML = `
+        <div style="text-align: center; padding: 2rem 0; animation: fadeIn 0.8s ease forwards;">
+          <div style="font-size: 4rem; margin-bottom: 1.5rem; animation: pulse 2s infinite;">✉️🚀</div>
+          <h2 class="section-title" style="background: linear-gradient(135deg, #00ffcc 0%, #3399ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">¡Mensaje Transmitido!</h2>
+          <p class="subtitle" style="margin-top: 1rem; font-size: 0.95rem;">Tu transmisión ha cruzado el horizonte de sucesos con éxito. Responderé tan pronto como mi transceptor reciba tu señal.</p>
+          <button id="reset-form-btn" class="cta-button" style="margin-top: 1rem; padding: 0.7rem 1.5rem; font-size: 0.9rem;">Enviar otra señal</button>
+        </div>
+      `;
+      const resetBtn = document.getElementById('reset-form-btn');
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          card.innerHTML = originalContent;
+          setupContactForm();
+        });
+      }
+    } catch {
+      // Error — restore the form so the visitor can retry
+      sceneManager.triggerContactAbsorb(false);
+      card.style.transform = 'scale(1)';
+      card.style.opacity = '1';
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Enviar Mensaje'; }
+      let errEl = document.getElementById('contact-error');
+      if (!errEl) {
+        errEl = document.createElement('p');
+        errEl.id = 'contact-error';
+        errEl.style.cssText = 'margin-top: 0.8rem; color: #ff6b6b; font-size: 0.85rem;';
+        contactForm.appendChild(errEl);
+      }
+      errEl.textContent = 'No se pudo enviar el mensaje. Revisa tu conexión e inténtalo de nuevo.';
     }
   });
 }
