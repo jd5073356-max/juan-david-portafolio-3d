@@ -40,12 +40,36 @@ export const projectsData: Project[] = [
     color: '#3399ff'
   },
   {
-    id: 'hermes',
-    title: 'Hermes Agent',
-    description: 'Agente de IA autónomo open-source con memoria a largo plazo, uso de herramientas externas e integración directa con plataformas de mensajería como Discord y Telegram.',
-    tags: ['TypeScript', 'Node.js', 'LLMs', 'Vector DB', 'Discord API', 'Telegram API'],
+    id: 'athena',
+    title: 'Athena (Gestión Escolar)',
+    description: 'Sistema web de gestión escolar en producción para una institución educativa: panel del rector con múltiples módulos administrativos, gestión documental y de usuarios. Desplegado y operando en Google Cloud Run.',
+    tags: ['Django', 'Python', 'Oracle DB', 'Google Cloud Run', 'OCI', 'HTML/CSS'],
+    link: 'https://github.com/jd5073356-max/athena-ceis',
+    color: '#ffd166'
+  },
+  {
+    id: 'aula',
+    title: 'Aula Inclusiva',
+    description: 'Plataforma web de educación inclusiva: los docentes arman actividades a partir de plantillas editables (estilo Canva), con ajustes de presentación por tipo de discapacidad (cognitiva, motriz, TEA) y seguimiento del progreso de cada estudiante.',
+    tags: ['Next.js', 'React', 'Accesibilidad', 'PostgreSQL', 'Roles', 'Plantillas'],
     link: 'https://github.com/jd5073356-max',
-    color: '#ffaa00'
+    color: '#06d6a0'
+  },
+  {
+    id: 'nexguard',
+    title: 'NexGuard',
+    description: 'Plataforma SaaS de monitoreo de activos y ciberseguridad: escaneo de seguridad, gestión de hallazgos y dashboard de alertas en tiempo real, con validación estricta de ownership antes de cada escaneo.',
+    tags: ['Next.js 15', 'tRPC', 'Drizzle ORM', 'Supabase', 'Recharts', 'Docker'],
+    link: 'https://github.com/jd5073356-max/nexguard',
+    color: '#fb5607'
+  },
+  {
+    id: 'neural',
+    title: 'Neural-Sync',
+    description: 'SaaS de analítica predictiva: subes un Excel/CSV y obtienes pronósticos de ventas, predicción de churn y detección de anomalías en dashboards interactivos, con consultas en lenguaje natural.',
+    tags: ['Next.js 15', 'FastAPI', 'Celery', 'scikit-learn', 'Prophet', 'Supabase'],
+    link: 'https://github.com/jd5073356-max/neural-sync',
+    color: '#8338ec'
   }
 ];
 

@@ -327,15 +327,15 @@ export class SceneManager {
     let targetCamZ = 7.5;
 
     if (progress < 1.0) {
-      // Interpolate from Hero (0, 0, 7.5) to Projects (0, -12, 8.5)
+      // Interpolate from Hero (0, 0, 7.5) to Projects (0, -12, 9.5)
       const t = progress;
       targetCamY = THREE.MathUtils.lerp(0, -12, t);
-      targetCamZ = THREE.MathUtils.lerp(7.5, 8.5, t);
+      targetCamZ = THREE.MathUtils.lerp(7.5, 9.5, t);
     } else if (progress < 2.0) {
-      // Interpolate from Projects (0, -12, 8.5) to Skills (0, -24, 7.5)
+      // Interpolate from Projects (0, -12, 9.5) to Skills (0, -24, 7.5)
       const t = progress - 1.0;
       targetCamY = THREE.MathUtils.lerp(-12, -24, t);
-      targetCamZ = THREE.MathUtils.lerp(8.5, 7.5, t);
+      targetCamZ = THREE.MathUtils.lerp(9.5, 7.5, t);
     } else {
       // Interpolate from Skills (0, -24, 7.5) to Contact (0, -36, 7.2)
       const t = Math.min(progress - 2.0, 1.0);
