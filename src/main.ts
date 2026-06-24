@@ -67,9 +67,13 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       
       <!-- Active Floating Project Card details -->
       <div id="project-details" class="projects-detail-panel interactive">
-        <h3 id="project-title" style="font-family: var(--font-display); font-size: 1.8rem; margin-bottom: 0.5rem; color: var(--accent-cyan); transition: color 0.3s ease;">Pasa el cursor sobre un proyecto</h3>
+        <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
+          <h3 id="project-title" style="font-family: var(--font-display); font-size: 1.8rem; margin: 0; color: var(--accent-cyan); transition: color 0.3s ease;">Pasa el cursor sobre un proyecto</h3>
+          <span id="project-status" style="display: none; font-family: var(--font-display); font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; padding: 0.25rem 0.65rem; border-radius: 100px; border: 1px solid transparent;"></span>
+        </div>
         <p id="project-desc" style="color: var(--text-secondary); line-height: 1.6; font-size: 0.95rem; transition: color 0.3s ease;">Selecciona uno de los módulos geométricos tridimensionales en la pantalla para revelar su información, arquitectura y tecnologías utilizadas.</p>
         <div id="project-tags" class="project-tags"></div>
+        <a id="project-link" target="_blank" rel="noopener noreferrer" style="display: none; align-self: flex-start; margin-top: 1.1rem; align-items: center; gap: 0.5rem; font-family: var(--font-display); font-weight: 600; font-size: 0.9rem; text-decoration: none; padding: 0.6rem 1.2rem; border-radius: 10px; border: 1px solid transparent; transition: transform 0.3s ease, box-shadow 0.3s ease;"></a>
       </div>
     </section>
 
@@ -249,6 +253,8 @@ const projectDetails = document.getElementById('project-details')!;
 const projectTitle = document.getElementById('project-title')!;
 const projectDesc = document.getElementById('project-desc')!;
 const projectTags = document.getElementById('project-tags')!;
+const projectStatus = document.getElementById('project-status')!;
+const projectLink = document.getElementById('project-link') as HTMLAnchorElement;
 let lastHoveredProject: number | null = null;
 
 sceneManager.onProjectHover = (index: number | null) => {
@@ -267,6 +273,23 @@ sceneManager.onProjectHover = (index: number | null) => {
         ${tag}
       </span>
     `).join('');
+
+    // Status badge (honest project state)
+    projectStatus.textContent = project.status;
+    projectStatus.style.display = 'inline-block';
+    projectStatus.style.color = project.color;
+    projectStatus.style.borderColor = `${project.color}66`;
+    projectStatus.style.background = `${project.color}14`;
+
+    // Clickable action button (demo / repo) — lets visitors verify it's real
+    projectLink.href = project.link;
+    projectLink.style.display = 'inline-flex';
+    projectLink.style.color = project.color;
+    projectLink.style.borderColor = `${project.color}66`;
+    projectLink.style.background = `${project.color}11`;
+    projectLink.innerHTML = `${project.linkLabel}
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>`;
+
     projectDetails.classList.add('visible');
     projectDetails.style.borderColor = project.color;
     projectDetails.style.boxShadow = `0 15px 40px ${project.color}15`;

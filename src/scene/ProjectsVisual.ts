@@ -70,12 +70,101 @@ export class ProjectsVisual {
       borderMesh.name = 'card_border';
       projectGroup.add(borderMesh);
 
+      // 2.5 Procedural "app screen" UI mockup on the card face (so it is not an empty rectangle)
+      this.addScreenMockup(projectGroup, project, cardWidth, cardHeight);
+
       // 3. Unique Procedural 3D Visual floating above each card
       this.addProceduralVisual(projectGroup, project, cardHeight);
 
       this.group.add(projectGroup);
       this.cards.push(projectGroup);
     });
+  }
+
+  // Builds a faux dashboard / app UI on the front face of the card so each project
+  // reads as a real working product, not an empty rectangle.
+  private addScreenMockup(parent: THREE.Group, project: Project, cardWidth: number, cardHeight: number) {
+    const color = new THREE.Color(project.color).getHex();
+    const screen = new THREE.Group();
+    screen.name = 'screen';
+    const zBase = 0.06;
+
+    const flat = (w: number, h: number, hex: number, opacity = 1, z = zBase) => {
+      const m = new THREE.Mesh(
+        new THREE.PlaneGeometry(w, h),
+        new THREE.MeshBasicMaterial({ color: hex, transparent: opacity < 1, opacity })
+      );
+      m.position.z = z;
+      return m;
+    };
+
+    const innerW = cardWidth - 0.5;   // ~3.0
+    const innerH = cardHeight - 0.55; // ~3.95
+    const top = innerH / 2;
+    const left = -innerW / 2;
+
+    // Inner screen panel (delimits the "app" area)
+    const panel = flat(innerW, innerH, 0x0a0e1a, 0.92, zBase);
+    screen.add(panel);
+
+    // Header bar with window dots + faux title
+    const header = flat(innerW, 0.42, 0x141a2b, 1, zBase + 0.01);
+    header.position.y = top - 0.21;
+    screen.add(header);
+    [0xff5f57, 0xfebc2e, 0x28c840].forEach((dc, i) => {
+      const dot = flat(0.085, 0.085, dc, 1, zBase + 0.02);
+      dot.position.set(left + 0.2 + i * 0.17, top - 0.21, 0);
+      screen.add(dot);
+    });
+    const titlePill = flat(0.95, 0.12, color, 0.65, zBase + 0.02);
+    titlePill.position.set(0.1, top - 0.21, 0);
+    screen.add(titlePill);
+
+    // KPI cards row
+    const kpiY = top - 0.85;
+    for (let i = 0; i < 3; i++) {
+      const x = (i - 1) * 0.98;
+      const card = flat(0.88, 0.6, color, 0.12, zBase + 0.01);
+      card.position.set(x, kpiY, 0);
+      screen.add(card);
+      const value = flat(0.5, 0.1, color, 0.85, zBase + 0.02);
+      value.position.set(x - 0.12, kpiY + 0.12, 0);
+      screen.add(value);
+      const sub = flat(0.62, 0.05, 0x2a3142, 1, zBase + 0.02);
+      sub.position.set(x - 0.06, kpiY - 0.12, 0);
+      screen.add(sub);
+    }
+
+    // Text-line placeholders (content rows)
+    [2.6, 2.15, 1.7].forEach((w, i) => {
+      const row = flat(w, 0.07, 0x2a3142, 1, zBase + 0.01);
+      row.position.set(left + w / 2 + 0.05, top - 1.45 - i * 0.24, 0);
+      screen.add(row);
+    });
+
+    // Animated bar chart (the "alive" part)
+    const bars = new THREE.Group();
+    bars.name = 'screenbars';
+    const baseY = -innerH / 2 + 0.35;
+    const barCount = 6;
+    for (let i = 0; i < barCount; i++) {
+      const bar = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.22, 1),
+        new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.8 })
+      );
+      const h0 = 0.5 + Math.random() * 0.9;
+      bar.scale.y = h0;
+      bar.position.set(left + 0.35 + i * 0.45, baseY + h0 / 2, zBase + 0.02);
+      bar.userData.baseY = baseY;
+      bars.add(bar);
+    }
+    screen.add(bars);
+    // chart baseline
+    const baseline = flat(innerW - 0.4, 0.03, color, 0.4, zBase + 0.01);
+    baseline.position.y = baseY;
+    screen.add(baseline);
+
+    parent.add(screen);
   }
 
   private addProceduralVisual(parent: THREE.Group, project: Project, cardHeight: number) {
@@ -366,6 +455,16 @@ export class ProjectsVisual {
       if (backing && backing.material) {
         const mat = backing.material as THREE.MeshStandardMaterial;
         mat.opacity = THREE.MathUtils.lerp(mat.opacity, isHovered ? 0.9 : 0.75, 0.1);
+      }
+
+      // Animate the dashboard bar chart on the card screen (makes it feel "live")
+      const bars = card.getObjectByName('screenbars');
+      if (bars) {
+        bars.children.forEach((bar, i) => {
+          const h = 0.45 + (Math.sin(time * (1.6 + i * 0.22) + i * 1.3) * 0.5 + 0.5) * 1.05;
+          bar.scale.y = THREE.MathUtils.lerp(bar.scale.y, h, 0.12);
+          bar.position.y = (bar.userData.baseY as number) + bar.scale.y / 2;
+        });
       }
     });
 
